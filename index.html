@@ -6,21 +6,23 @@
     <title>LksAI - Advanced Chatting AI</title>
     <style>
         :root {
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary-color: #10b981;
+            --primary-color: #14b8a6;
+            --primary-dark: #0d9488;
+            --primary-light: #2dd4bf;
+            --secondary-color: #06b6d4;
+            --tertiary-color: #0891b2;
             --danger-color: #ef4444;
-            --bg-dark: #0f172a;
-            --bg-darker: #0a0f1b;
-            --bg-card: #1e293b;
-            --bg-card-hover: #334155;
-            --text-primary: #f1f5f9;
+            --bg-dark: #0a0e27;
+            --bg-darker: #050812;
+            --bg-card: rgba(15, 23, 42, 0.4);
+            --bg-card-hover: rgba(20, 30, 55, 0.6);
+            --text-primary: #f0f9ff;
             --text-secondary: #cbd5e1;
-            --border-color: #334155;
-            --message-user-bg: #6366f1;
-            --message-ai-bg: #1e293b;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --border-color: rgba(20, 184, 166, 0.2);
+            --message-user-bg: linear-gradient(135deg, #14b8a6, #0d9488);
+            --message-ai-bg: rgba(15, 23, 42, 0.5);
+            --shadow: 0 8px 32px rgba(20, 184, 166, 0.15);
+            --glow: 0 0 20px rgba(20, 184, 166, 0.3);
         }
 
         * {
@@ -29,39 +31,183 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            line-height: 1.6;
+        html, body {
+            width: 100%;
+            height: 100%;
             overflow: hidden;
         }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Animated Background with Stars and Moon */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(20, 184, 166, 0.1) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Animated stars background */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: twinkle 3s infinite;
+        }
+
+        .star.small {
+            width: 1px;
+            height: 1px;
+            opacity: 0.5;
+        }
+
+        .star.large {
+            width: 3px;
+            height: 3px;
+            opacity: 0.7;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Animated Moon */
+        .moon {
+            position: fixed;
+            top: 60px;
+            right: 80px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 30% 30%, #fff, #f0f0f0 20%, #e0e0e0);
+            border-radius: 50%;
+            box-shadow: 0 0 60px rgba(20, 184, 166, 0.3),
+                        inset -20px -20px 40px rgba(0, 0, 0, 0.2);
+            animation: moonGlow 6s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes moonGlow {
+            0%, 100% { 
+                box-shadow: 0 0 60px rgba(20, 184, 166, 0.3), inset -20px -20px 40px rgba(0, 0, 0, 0.2);
+            }
+            50% { 
+                box-shadow: 0 0 80px rgba(20, 184, 166, 0.5), inset -20px -20px 40px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        /* Moon craters */
+        .moon::before,
+        .moon::after {
+            content: '';
+            position: absolute;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+        }
+
+        .moon::before {
+            width: 20px;
+            height: 20px;
+            top: 30px;
+            left: 30px;
+            box-shadow: 30px 30px 15px rgba(0, 0, 0, 0.1),
+                        50px 10px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Floating clouds effect */
+        .cloud {
+            position: fixed;
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(6, 182, 212, 0.05));
+            border-radius: 100px;
+            opacity: 0.1;
+            animation: float 20s infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .cloud1 {
+            width: 200px;
+            height: 80px;
+            top: 10%;
+            left: -200px;
+            animation: float 20s infinite linear;
+        }
+
+        .cloud2 {
+            width: 150px;
+            height: 60px;
+            top: 30%;
+            right: -150px;
+            animation: float 25s infinite linear reverse;
+        }
+
+        .cloud3 {
+            width: 180px;
+            height: 70px;
+            top: 60%;
+            left: -180px;
+            animation: float 30s infinite linear;
+        }
+
+        @keyframes float {
+            from { transform: translateX(0); }
+            to { transform: translateX(100vw); }
+        }
+
         body.light-mode {
-            --bg-dark: #ffffff;
-            --bg-darker: #f8f9fa;
-            --bg-card: #f1f5f9;
-            --bg-card-hover: #e2e8f0;
+            --bg-dark: #f0f4f8;
+            --bg-darker: #e8eef5;
+            --bg-card: rgba(241, 245, 249, 0.4);
+            --bg-card-hover: rgba(226, 232, 240, 0.6);
             --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --border-color: #cbd5e1;
-            --message-ai-bg: #e2e8f0;
+            --text-secondary: #64748b;
+            --border-color: rgba(20, 184, 166, 0.3);
+            --message-ai-bg: rgba(240, 249, 255, 0.5);
         }
 
         .container {
             display: flex;
             height: 100vh;
             background-color: var(--bg-dark);
+            position: relative;
+            z-index: 2;
         }
 
         /* Sidebar */
         .sidebar {
             width: 300px;
-            background-color: var(--bg-darker);
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            box-shadow: inset -1px 0 0 var(--border-color);
+            box-shadow: inset 1px 0 0 var(--border-color);
+            border-radius: 0 20px 20px 0;
         }
 
         .sidebar-header {
@@ -70,22 +216,23 @@
         }
 
         .app-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             margin-bottom: 15px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            letter-spacing: 1px;
         }
 
         .new-chat-btn {
             width: 100%;
-            padding: 12px;
-            background-color: var(--primary-color);
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -94,12 +241,29 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .new-chat-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .new-chat-btn:hover::before {
+            left: 100%;
         }
 
         .new-chat-btn:hover {
-            background-color: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 6px 25px rgba(20, 184, 166, 0.5);
         }
 
         .plus-icon {
@@ -114,11 +278,11 @@
 
         .chat-history h3 {
             padding: 10px;
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             color: var(--text-secondary);
-            font-weight: 600;
-            letter-spacing: 1px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
         }
 
         .chat-list {
@@ -130,8 +294,8 @@
         .chat-item {
             padding: 12px;
             background-color: transparent;
-            border: none;
-            border-radius: 6px;
+            border: 1px solid transparent;
+            border-radius: 10px;
             color: var(--text-secondary);
             cursor: pointer;
             text-align: left;
@@ -139,17 +303,21 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
 
         .chat-item:hover {
-            background-color: var(--bg-card-hover);
+            background: var(--bg-card-hover);
             color: var(--text-primary);
+            border-color: var(--border-color);
+            transform: translateX(5px);
         }
 
         .chat-item.active {
-            background-color: var(--primary-color);
-            color: white;
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.3), rgba(6, 182, 212, 0.2));
+            color: #14b8a6;
+            border-color: var(--border-color);
+            font-weight: 600;
         }
 
         .sidebar-footer {
@@ -159,19 +327,23 @@
 
         .settings-btn {
             width: 100%;
-            padding: 10px;
-            background-color: var(--bg-card);
+            padding: 12px;
+            background: var(--bg-card);
             color: var(--text-primary);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .settings-btn:hover {
-            background-color: var(--bg-card-hover);
+            background: var(--bg-card-hover);
+            border-color: #14b8a6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2);
         }
 
         /* Main Content */
@@ -179,21 +351,27 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            background-color: var(--bg-dark);
+            background-color: transparent;
         }
 
         .chat-header {
-            padding: 15px 30px;
+            padding: 20px 30px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--bg-card);
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 20px 0 0 0;
         }
 
         .header-left h2 {
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header-right {
@@ -210,28 +388,31 @@
 
         .model-selector label {
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .model-selector select {
             padding: 8px 12px;
-            background-color: var(--bg-dark);
+            background: var(--bg-card);
             color: var(--text-primary);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 13px;
             cursor: pointer;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .model-selector select:hover {
-            border-color: var(--primary-color);
+            border-color: #14b8a6;
+            box-shadow: 0 0 10px rgba(20, 184, 166, 0.2);
         }
 
         .model-selector select:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+            border-color: #14b8a6;
+            box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);
         }
 
         .messages-container {
@@ -240,6 +421,7 @@
             padding: 30px;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .messages-area {
@@ -253,52 +435,81 @@
             text-align: center;
             margin: auto;
             padding: 40px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .welcome-message h1 {
-            font-size: 36px;
+            font-size: 42px;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, #14b8a6, #06b6d4, #14b8a6);
+            background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: gradientShift 8s ease infinite;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .welcome-message p {
             color: var(--text-secondary);
             font-size: 16px;
             margin-bottom: 30px;
+            font-weight: 500;
         }
 
         .feature-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
+            gap: 20px;
             margin-top: 30px;
         }
 
         .feature {
             padding: 20px;
-            background-color: var(--bg-card);
-            border-radius: 8px;
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .feature:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-5px);
+            border-color: #14b8a6;
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+            background: rgba(20, 184, 166, 0.1);
         }
 
         .feature span {
-            font-size: 32px;
+            font-size: 36px;
             display: block;
             margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
         }
 
         .feature p {
             font-size: 13px;
             color: var(--text-secondary);
+            font-weight: 600;
         }
 
         /* Messages */
@@ -326,23 +537,25 @@
 
         .message-content {
             max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 14px 18px;
+            border-radius: 15px;
             word-wrap: break-word;
             white-space: pre-wrap;
+            backdrop-filter: blur(10px);
         }
 
         .message.user .message-content {
-            background-color: var(--message-user-bg);
+            background: var(--message-user-bg);
             color: white;
-            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
+            border-radius: 15px 4px 15px 15px;
         }
 
         .message.ai .message-content {
-            background-color: var(--message-ai-bg);
+            background: var(--message-ai-bg);
             color: var(--text-primary);
-            border-bottom-left-radius: 4px;
             border: 1px solid var(--border-color);
+            border-radius: 4px 15px 15px 15px;
         }
 
         .message.ai .message-icon {
@@ -350,76 +563,44 @@
         }
 
         .message-content code {
-            background-color: rgba(0, 0, 0, 0.2);
+            background-color: rgba(20, 184, 166, 0.2);
             padding: 2px 6px;
-            border-radius: 3px;
+            border-radius: 4px;
             font-family: 'Courier New', monospace;
             font-size: 13px;
+            color: #2dd4bf;
         }
 
         .message-content pre {
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: rgba(0, 0, 0, 0.2);
             padding: 10px;
-            border-radius: 6px;
+            border-radius: 8px;
             overflow-x: auto;
             margin: 8px 0;
-        }
-
-        /* Loading Animation */
-        .loading {
-            display: flex;
-            gap: 4px;
-        }
-
-        .loading span {
-            width: 8px;
-            height: 8px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            animation: bounce 1.4s infinite;
-        }
-
-        .loading span:nth-child(1) {
-            animation-delay: 0s;
-        }
-
-        .loading span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .loading span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes bounce {
-            0%, 60%, 100% {
-                transform: translateY(0);
-            }
-            30% {
-                transform: translateY(-10px);
-            }
+            border-left: 3px solid #14b8a6;
         }
 
         /* Input Area */
         .input-area {
             padding: 20px 30px 30px;
-            background-color: var(--bg-dark);
+            background-color: transparent;
             border-top: 1px solid var(--border-color);
         }
 
         .input-wrapper {
             display: flex;
             gap: 10px;
-            background-color: var(--bg-card);
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 15px;
             padding: 10px;
             transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
         }
 
         .input-wrapper:focus-within {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+            border-color: #14b8a6;
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.2);
         }
 
         .message-input {
@@ -440,10 +621,10 @@
         }
 
         .send-btn {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             width: 40px;
             height: 40px;
             cursor: pointer;
@@ -453,11 +634,29 @@
             justify-content: center;
             transition: all 0.3s ease;
             flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .send-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .send-btn:hover:not(:disabled)::before {
+            left: 100%;
         }
 
         .send-btn:hover:not(:disabled) {
-            background-color: var(--primary-dark);
-            transform: scale(1.05);
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(20, 184, 166, 0.5);
         }
 
         .send-btn:disabled {
@@ -476,14 +675,15 @@
         .api-status {
             padding: 4px 8px;
             border-radius: 4px;
+            font-weight: 600;
         }
 
         .api-status.ready {
-            color: var(--secondary-color);
+            color: #14b8a6;
         }
 
         .api-status.loading {
-            color: var(--primary-color);
+            color: #06b6d4;
         }
 
         .api-status.error {
@@ -499,17 +699,14 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
             animation: fadeIn 0.3s ease;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal.active {
@@ -519,14 +716,16 @@
         }
 
         .modal-content {
-            background-color: var(--bg-card);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(20, 184, 166, 0.2);
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
             animation: slideUp 0.3s ease;
+            border: 1px solid var(--border-color);
         }
 
         @keyframes slideUp {
@@ -546,11 +745,16 @@
             align-items: center;
             padding: 25px;
             border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(20, 184, 166, 0.1), rgba(6, 182, 212, 0.05));
         }
 
         .modal-header h2 {
             font-size: 22px;
-            font-weight: 600;
+            font-weight: 700;
+            background: linear-gradient(135deg, #14b8a6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .close-btn {
@@ -559,11 +763,12 @@
             font-size: 28px;
             color: var(--text-secondary);
             cursor: pointer;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .close-btn:hover {
-            color: var(--text-primary);
+            color: #14b8a6;
+            transform: rotate(90deg);
         }
 
         .modal-body {
@@ -577,41 +782,8 @@
         .setting-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-primary);
-        }
-
-        .api-key-input {
-            width: 100%;
-            padding: 10px 12px;
-            background-color: var(--bg-dark);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .api-key-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
-        }
-
-        .hint {
-            display: block;
-            margin-top: 5px;
-            color: var(--text-secondary);
-            font-size: 12px;
-        }
-
-        .hint a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .hint a:hover {
-            text-decoration: underline;
         }
 
         .slider-container {
@@ -624,7 +796,7 @@
             flex: 1;
             height: 6px;
             border-radius: 3px;
-            background: linear-gradient(to right, var(--text-secondary), var(--primary-color));
+            background: linear-gradient(to right, var(--text-secondary), #14b8a6);
             outline: none;
             -webkit-appearance: none;
             appearance: none;
@@ -633,39 +805,41 @@
         .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: var(--primary-color);
+            background: #14b8a6;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
         }
 
         .slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.8);
         }
 
         .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: var(--primary-color);
+            background: #14b8a6;
             cursor: pointer;
             border: none;
             transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
         }
 
         .slider::-moz-range-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.8);
         }
 
         .temp-value {
             min-width: 40px;
             text-align: right;
-            color: var(--primary-color);
-            font-weight: 600;
+            color: #14b8a6;
+            font-weight: 700;
         }
 
         .button-group {
@@ -678,7 +852,7 @@
             flex: 1;
             padding: 12px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
@@ -686,23 +860,25 @@
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
             color: white;
+            box-shadow: 0 4px 15px rgba(20, 184, 166, 0.3);
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(20, 184, 166, 0.5);
         }
 
         .btn-secondary {
-            background-color: var(--bg-dark);
+            background: var(--bg-card);
             color: var(--text-primary);
             border: 1px solid var(--border-color);
         }
 
         .btn-secondary:hover {
-            background-color: var(--bg-card);
+            border-color: #14b8a6;
+            background: rgba(20, 184, 166, 0.1);
         }
 
         /* Toast Notification */
@@ -711,12 +887,13 @@
             bottom: -100px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: var(--bg-card);
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
             color: var(--text-primary);
             padding: 15px 20px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-            box-shadow: var(--shadow);
+            border-radius: 12px;
+            border-left: 4px solid #14b8a6;
+            box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
             z-index: 2000;
             transition: bottom 0.3s ease;
         }
@@ -726,7 +903,7 @@
         }
 
         .toast.success {
-            border-left-color: var(--secondary-color);
+            border-left-color: #14b8a6;
         }
 
         .toast.error {
@@ -744,16 +921,23 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
+            background: rgba(20, 184, 166, 0.3);
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
+            background: rgba(20, 184, 166, 0.6);
         }
 
         /* Responsive Design */
         @media (max-width: 768px) {
+            .moon {
+                width: 80px;
+                height: 80px;
+                top: 40px;
+                right: 40px;
+            }
+
             .container {
                 flex-direction: column;
             }
@@ -764,6 +948,7 @@
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
                 flex-direction: row;
+                border-radius: 0;
             }
 
             .sidebar-header {
@@ -781,6 +966,7 @@
             .chat-header {
                 flex-direction: column;
                 gap: 15px;
+                border-radius: 0;
             }
 
             .messages-container {
@@ -798,15 +984,19 @@
             .modal-content {
                 width: 95%;
             }
+
+            .welcome-message h1 {
+                font-size: 28px;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 480px) {
             .welcome-message h1 {
                 font-size: 24px;
-            }
-
-            .feature-grid {
-                grid-template-columns: 1fr;
             }
 
             .message-content {
@@ -820,10 +1010,41 @@
             .send-btn {
                 width: 100%;
             }
+
+            .app-title {
+                font-size: 20px;
+            }
+        }
+
+        .hint {
+            display: block;
+            margin-top: 5px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .hint a {
+            color: #14b8a6;
+            text-decoration: none;
+        }
+
+        .hint a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
+    <!-- Animated Stars Background -->
+    <div class="stars" id="starsContainer"></div>
+    
+    <!-- Animated Moon -->
+    <div class="moon"></div>
+    
+    <!-- Floating Clouds -->
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+
     <div class="container">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -857,11 +1078,12 @@
                     <div class="model-selector">
                         <label for="modelSelect">Model:</label>
                         <select id="modelSelect" onchange="changeModel()">
-                            <option value="claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                            <option value="deepseek-chat">DeepSeek Chat</option>
+                            <option value="openai/gpt-4o">GPT-4 Omni</option>
+                            <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+                            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                            <option value="deepseek/deepseek-chat">DeepSeek Chat</option>
                             <option value="meta-llama/llama-2-70b-chat">Llama 2 70B</option>
-                            <option value="mistral-7b-instruct">Mistral 7B</option>
-                            <option value="gpt-3.5-turbo">GPT 3.5 Turbo</option>
+                            <option value="mistral/mistral-7b-instruct">Mistral 7B</option>
                         </select>
                     </div>
                 </div>
@@ -871,8 +1093,8 @@
             <div class="messages-container">
                 <div id="messagesArea" class="messages-area">
                     <div class="welcome-message">
-                        <h1>Welcome to LksAI</h1>
-                        <p>Your advanced AI assistant powered by multiple models</p>
+                        <h1>✨ Welcome to LksAI ✨</h1>
+                        <p>Your advanced AI assistant powered by OpenRouter</p>
                         <div class="feature-grid">
                             <div class="feature">
                                 <span>🚀</span>
@@ -915,18 +1137,17 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Settings</h2>
+                <h2>⚙️ Settings</h2>
                 <button class="close-btn" onclick="toggleSettings()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="setting-group">
-                    <label for="apiKeyInput">OpenRouter API Key:</label>
-                    <input type="password" id="apiKeyInput" class="api-key-input" placeholder="Enter your API key">
-                    <small class="hint">Get free API key at <a href="https://openrouter.ai" target="_blank">openrouter.ai</a></small>
+                    <label>✅ Free API Key Pre-configured</label>
+                    <small class="hint">Powered by OpenRouter - No API key needed to start chatting!</small>
                 </div>
 
                 <div class="setting-group">
-                    <label for="temperatureSlider">Temperature (Creativity):</label>
+                    <label for="temperatureSlider">🌡️ Temperature (Creativity):</label>
                     <div class="slider-container">
                         <input type="range" id="temperatureSlider" class="slider" min="0" max="1" step="0.1" value="0.7" onchange="updateTemperature()">
                         <span id="temperatureValue" class="temp-value">0.7</span>
@@ -935,7 +1156,7 @@
                 </div>
 
                 <div class="setting-group">
-                    <label for="contextWindowSlider">Context Window:</label>
+                    <label for="contextWindowSlider">🧠 Context Window:</label>
                     <div class="slider-container">
                         <input type="range" id="contextWindowSlider" class="slider" min="1" max="10" step="1" value="5" onchange="updateContextWindow()">
                         <span id="contextValue" class="temp-value">5</span>
@@ -946,14 +1167,14 @@
                 <div class="setting-group">
                     <label>
                         <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()" checked>
-                        Dark Mode
+                        🌙 Dark Mode
                     </label>
                 </div>
 
                 <div class="setting-group">
                     <label>
                         <input type="checkbox" id="soundToggle" onchange="toggleSound()">
-                        Enable Sound Notifications
+                        🔔 Enable Sound Notifications
                     </label>
                 </div>
 
@@ -969,10 +1190,33 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        // Generate random stars
+        function generateStars() {
+            const starsContainer = document.getElementById('starsContainer');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // Random size
+                const sizeClass = Math.random() > 0.7 ? 'large' : Math.random() > 0.5 ? 'small' : '';
+                if (sizeClass) star.classList.add(sizeClass);
+                
+                // Random position
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                
+                // Random animation delay
+                star.style.animationDelay = Math.random() * 3 + 's';
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
         // ========== STATE MANAGEMENT ==========
         const state = {
-            apiKey: localStorage.getItem('lksai_api_key') || '',
-            currentModel: 'claude-3.5-sonnet',
+            currentModel: 'openai/gpt-4o',
             temperature: parseFloat(localStorage.getItem('lksai_temperature') || '0.7'),
             contextWindow: parseInt(localStorage.getItem('lksai_context_window') || '5'),
             darkMode: localStorage.getItem('lksai_dark_mode') !== 'false',
@@ -981,20 +1225,15 @@
             chatHistory: JSON.parse(localStorage.getItem('lksai_chat_history') || '[]'),
             currentChatId: null,
             isLoading: false,
-            soundUrl: 'data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA=='
+            soundUrl: 'data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==',
+            apiKey: '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'
         };
 
         const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-        const MODELS = {
-            'claude-3.5-sonnet': 'anthropic/claude-3.5-sonnet',
-            'deepseek-chat': 'deepseek/deepseek-chat',
-            'meta-llama/llama-2-70b-chat': 'meta-llama/llama-2-70b-chat',
-            'mistral-7b-instruct': 'mistral/mistral-7b-instruct',
-            'gpt-3.5-turbo': 'openai/gpt-3.5-turbo'
-        };
 
         // ========== INITIALIZATION ==========
         document.addEventListener('DOMContentLoaded', () => {
+            generateStars();
             initializeApp();
             setupEventListeners();
             loadSettingsFromStorage();
@@ -1002,35 +1241,24 @@
         });
 
         function initializeApp() {
-            // Set initial dark mode
             if (state.darkMode) {
                 document.body.classList.remove('light-mode');
             } else {
                 document.body.classList.add('light-mode');
             }
 
-            // Load saved API key
-            const apiKeyInput = document.getElementById('apiKeyInput');
-            if (apiKeyInput && state.apiKey) {
-                apiKeyInput.value = state.apiKey;
-            }
-
-            // Setup auto-resize textarea
             setupTextareaAutoResize();
-            
-            showToast('Welcome to LksAI! Please add your OpenRouter API key in Settings.', 'info');
+            showToast('✨ LksAI Ready! Start chatting with free OpenRouter API', 'success');
         }
 
         function setupEventListeners() {
             const messageInput = document.getElementById('messageInput');
-            const apiKeyInput = document.getElementById('apiKeyInput');
             const modelSelect = document.getElementById('modelSelect');
             const temperatureSlider = document.getElementById('temperatureSlider');
             const contextWindowSlider = document.getElementById('contextWindowSlider');
             const darkModeToggle = document.getElementById('darkModeToggle');
             const soundToggle = document.getElementById('soundToggle');
 
-            // Message input events
             if (messageInput) {
                 messageInput.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1040,16 +1268,6 @@
                 });
             }
 
-            // API Key input
-            if (apiKeyInput) {
-                apiKeyInput.addEventListener('change', (e) => {
-                    state.apiKey = e.target.value;
-                    localStorage.setItem('lksai_api_key', state.apiKey);
-                    showToast('API Key saved!', 'success');
-                });
-            }
-
-            // Model selection
             if (modelSelect) {
                 modelSelect.addEventListener('change', (e) => {
                     state.currentModel = e.target.value;
@@ -1057,7 +1275,6 @@
                 });
             }
 
-            // Temperature slider
             if (temperatureSlider) {
                 temperatureSlider.addEventListener('input', (e) => {
                     state.temperature = parseFloat(e.target.value);
@@ -1066,7 +1283,6 @@
                 });
             }
 
-            // Context window slider
             if (contextWindowSlider) {
                 contextWindowSlider.addEventListener('input', (e) => {
                     state.contextWindow = parseInt(e.target.value);
@@ -1075,13 +1291,11 @@
                 });
             }
 
-            // Dark mode toggle
             if (darkModeToggle) {
                 darkModeToggle.checked = state.darkMode;
                 darkModeToggle.addEventListener('change', toggleDarkMode);
             }
 
-            // Sound toggle
             if (soundToggle) {
                 soundToggle.checked = state.soundEnabled;
                 soundToggle.addEventListener('change', toggleSound);
@@ -1102,10 +1316,9 @@
             const modelSelect = document.getElementById('modelSelect');
             const temperatureSlider = document.getElementById('temperatureSlider');
             const contextWindowSlider = document.getElementById('contextWindowSlider');
-            const darkModeToggle = document.getElementById('darkModeToggle');
 
             if (modelSelect) {
-                const savedModel = localStorage.getItem('lksai_model') || 'claude-3.5-sonnet';
+                const savedModel = localStorage.getItem('lksai_model') || 'openai/gpt-4o';
                 state.currentModel = savedModel;
                 modelSelect.value = savedModel;
             }
@@ -1131,24 +1344,16 @@
                 return;
             }
 
-            if (!state.apiKey) {
-                showToast('Please add your OpenRouter API key in Settings', 'error');
-                toggleSettings();
-                return;
-            }
-
             if (state.isLoading) {
                 showToast('Waiting for response...', 'info');
                 return;
             }
 
-            // Add user message
             state.messages.push({ role: 'user', content: message });
             renderMessages();
             messageInput.value = '';
             messageInput.style.height = 'auto';
 
-            // Generate new chat if needed
             if (!state.currentChatId) {
                 state.currentChatId = generateChatId();
                 const chatEntry = {
@@ -1167,7 +1372,6 @@
             document.querySelector('.send-btn').disabled = true;
 
             try {
-                // Get relevant context
                 const contextMessages = getContextMessages();
                 
                 const response = await fetch(OPENROUTER_API_URL, {
@@ -1179,7 +1383,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: MODELS[state.currentModel],
+                        model: state.currentModel,
                         messages: contextMessages,
                         temperature: state.temperature,
                         max_tokens: 2048,
@@ -1199,7 +1403,7 @@
             } catch (error) {
                 console.error('Error:', error);
                 showToast(`Error: ${error.message}`, 'error');
-                state.messages.pop(); // Remove user message on error
+                state.messages.pop();
                 renderMessages();
                 updateApiStatus('error');
             } finally {
@@ -1241,16 +1445,13 @@
 
                             state.messages[state.messages.length - 1].content = assistantMessage;
                             renderMessages();
-                        } catch (e) {
-                            // Skip invalid JSON
-                        }
+                        } catch (e) {}
                     }
                 }
             }
         }
 
         function getContextMessages() {
-            // Return last N messages for context (limited by contextWindow)
             const startIndex = Math.max(0, state.messages.length - state.contextWindow * 2);
             return state.messages.slice(startIndex);
         }
@@ -1261,8 +1462,8 @@
             if (state.messages.length === 0) {
                 messagesArea.innerHTML = `
                     <div class="welcome-message">
-                        <h1>Welcome to LksAI</h1>
-                        <p>Your advanced AI assistant powered by multiple models</p>
+                        <h1>✨ Welcome to LksAI ✨</h1>
+                        <p>Your advanced AI assistant powered by OpenRouter</p>
                         <div class="feature-grid">
                             <div class="feature">
                                 <span>🚀</span>
@@ -1288,7 +1489,7 @@
 
             messagesArea.innerHTML = '';
             
-            state.messages.forEach((msg, index) => {
+            state.messages.forEach((msg) => {
                 const messageEl = document.createElement('div');
                 messageEl.className = `message ${msg.role}`;
 
@@ -1306,22 +1507,15 @@
                 messagesArea.appendChild(messageEl);
             });
 
-            // Auto-scroll to bottom
             messagesArea.parentElement.scrollTop = messagesArea.parentElement.scrollHeight;
         }
 
         function formatMessage(content) {
-            // Escape HTML but preserve code formatting
             let formatted = escapeHtml(content);
-            
-            // Format inline code
             formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
-            
-            // Format code blocks
             formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
                 return `<pre><code class="language-${lang || 'plaintext'}">${code.trim()}</code></pre>`;
             });
-            
             return formatted;
         }
 
@@ -1331,7 +1525,6 @@
             return div.innerHTML;
         }
 
-        // ========== CHAT HISTORY ==========
         function startNewChat() {
             state.messages = [];
             state.currentChatId = null;
@@ -1385,7 +1578,6 @@
             return Date.now().toString(36) + Math.random().toString(36).substr(2);
         }
 
-        // ========== SETTINGS & UI ==========
         function toggleSettings() {
             const modal = document.getElementById('settingsModal');
             modal.classList.toggle('active');
@@ -1435,7 +1627,6 @@
             }
         }
 
-        // ========== UTILITIES ==========
         function updateApiStatus(status) {
             const apiStatus = document.getElementById('apiStatus');
             const statusMap = {
@@ -1452,9 +1643,7 @@
         function playNotificationSound() {
             if (state.soundEnabled) {
                 const audio = new Audio(state.soundUrl);
-                audio.play().catch(() => {
-                    // Silently fail if audio can't play
-                });
+                audio.play().catch(() => {});
             }
         }
 
@@ -1468,7 +1657,6 @@
             }, 3000);
         }
 
-        // Close modal when clicking outside
         document.addEventListener('click', (e) => {
             const modal = document.getElementById('settingsModal');
             if (e.target === modal) {
@@ -1476,9 +1664,9 @@
             }
         });
 
-        // Focus on input when page loads
         window.addEventListener('load', () => {
             document.getElementById('messageInput').focus();
         });
     </script>
 </body>
+</html>
