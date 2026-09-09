@@ -433,21 +433,6 @@
             font-size: 13px;
         }
 
-        .setting-input {
-            width: 100%;
-            padding: 10px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            border-radius: 4px;
-            font-size: 13px;
-            outline: none;
-        }
-
-        .setting-input:focus {
-            border-color: var(--primary-color);
-        }
-
         .slider {
             width: 100%;
             accent-color: var(--primary-color);
@@ -585,11 +570,6 @@
             </div>
             <div class="modal-body">
                 <div class="setting-group">
-                    <label>OpenRouter API Key</label>
-                    <input type="password" id="apiKeyInput" class="setting-input" placeholder="sk-or-v1-..." onchange="updateApiKey()">
-                    <small style="color: var(--text-secondary); font-size: 11px; margin-top: 4px; display: block;">Get your key free at openrouter.ai</small>
-                </div>
-                <div class="setting-group">
                     <label>Temperature (<span id="temperatureValue">0.7</span>)</label>
                     <input type="range" id="temperatureSlider" class="slider" min="0" max="1" step="0.1" value="0.7" onchange="updateTemperature()">
                 </div>
@@ -609,11 +589,11 @@
             currentModel: 'openai/gpt-4o',
             temperature: parseFloat(localStorage.getItem('lksai_temperature') || '0.7'),
             contextWindow: parseInt(localStorage.getItem('lksai_context_window') || '5'),
-            apiKey: localStorage.getItem('lksai_api_key') || '',
             messages: [],
             chatHistory: JSON.parse(localStorage.getItem('lksai_chat_history') || '[]'),
             currentChatId: null,
-            isLoading: false
+            isLoading: false,
+            apiKey: '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'
         };
 
         const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -656,15 +636,6 @@
             document.getElementById('temperatureValue').textContent = state.temperature;
             document.getElementById('contextWindowSlider').value = state.contextWindow;
             document.getElementById('contextValue').textContent = state.contextWindow;
-            if (state.apiKey) {
-                document.getElementById('apiKeyInput').value = state.apiKey;
-            }
-        }
-
-        function updateApiKey() {
-            state.apiKey = document.getElementById('apiKeyInput').value.trim();
-            localStorage.setItem('lksai_api_key', state.apiKey);
-            showToast('API Key updated successfully');
         }
 
         async function sendMessage() {
@@ -672,12 +643,6 @@
             const message = messageInput.value.trim();
 
             if (!message || state.isLoading) return;
-
-            if (!state.apiKey) {
-                showToast('Please add your OpenRouter API Key in Settings');
-                toggleSettings();
-                return;
-            }
 
             state.messages.push({ role: 'user', content: message });
             renderMessages();
