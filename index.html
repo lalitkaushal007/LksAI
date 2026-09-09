@@ -593,6 +593,7 @@
             chatHistory: JSON.parse(localStorage.getItem('lksai_chat_history') || '[]'),
             currentChatId: null,
             isLoading: false,
+            // Updated API Key from User Request
             apiKey: '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'
         };
 
@@ -663,11 +664,14 @@
             document.querySelector('.send-btn').disabled = true;
 
             try {
+                // Ensure HTTP-Referer is present even if running from local file
+                const referer = (window.location.href.startsWith('http')) ? window.location.href : 'https://lksai-app.local';
+
                 const response = await fetch(OPENROUTER_API_URL, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${state.apiKey}`,
-                        'HTTP-Referer': window.location.href,
+                        'HTTP-Referer': referer,
                         'X-Title': 'LksAI',
                         'Content-Type': 'application/json'
                     },
@@ -675,20 +679,20 @@
                         model: state.currentModel,
                         messages: state.messages.slice(-state.contextWindow * 2),
                         temperature: state.temperature,
-                        stream: true
+                        stream: true // Keeping stream:true for the word-by-word UI animation
                     })
                 });
 
                 if (!response.ok) {
                     const errJson = await response.json().catch(() => ({}));
-                    throw new Error(errJson.error?.message || `API Error: ${response.status}`);
+                    throw new Error(errJson.error?.message || `API Error: ${response.status} - ${response.statusText}`);
                 }
 
                 await handleStreamedResponse(response);
                 updateChatHistory();
             } catch (error) {
                 showToast(`Error: ${error.message}`);
-                state.messages.pop();
+                state.messages.pop(); // Remove the user message if it failed
                 renderMessages();
             } finally {
                 state.isLoading = false;
@@ -723,12 +727,12 @@
                             }
 
                             state.messages[state.messages.length - 1].content = assistantMessage;
-                            renderMessages(true);
+                            renderMessages(true); // Pass true to show blinking cursor
                         } catch (e) {}
                     }
                 }
             }
-            renderMessages(false);
+            renderMessages(false); // Stop blinking cursor
         }
 
         function renderMessages(isStreaming = false) {
@@ -764,6 +768,7 @@
                 messagesArea.appendChild(messageEl);
             });
 
+            // Smooth scroll to bottom
             const container = document.querySelector('.messages-container');
             container.scrollTop = container.scrollHeight;
         }
