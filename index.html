@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LksAI - Simple & Clean</title>
+    <title>LksAI - Netflix Clean</title>
+    <!-- Custom Logo Font -->
+    <link href="https://fonts.cdnfonts.com/css/ethnocentric" rel="stylesheet">
     <style>
         :root {
-            /* Netflix Theme Colors */
             --primary-color: #E50914;
             --primary-dark: #B20710;
             --bg-dark: #141414;
@@ -16,8 +17,6 @@
             --text-primary: #FFFFFF;
             --text-secondary: #B3B3B3;
             --border-color: #333333;
-            
-            /* Chat Bubbles */
             --message-user-bg: #2B2B2B;
             --message-ai-bg: transparent;
         }
@@ -57,13 +56,22 @@
             padding: 20px;
         }
 
+        /* Custom Ethnocentric Logo Styles */
         .app-title {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            font-family: 'Ethnocentric Rg', sans-serif;
+            font-size: clamp(16px, 2vw, 22px);
+            font-weight: 500;
+            letter-spacing: 4px;
+            line-height: 1.25;
             text-transform: uppercase;
+            text-align: left;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 16px;
+            padding: 0;
+            width: 100%;
+            box-sizing: border-box;
+            white-space: nowrap;
         }
 
         .new-chat-btn {
@@ -205,34 +213,34 @@
             width: 100%;
         }
 
-        /* Welcome Message */
         .welcome-message {
             text-align: center;
             margin: auto;
             padding: 40px;
-            animation: fadeIn 1s ease;
         }
 
         .welcome-message h1 {
-            font-size: 48px;
-            font-weight: 800;
-            margin-bottom: 10px;
+            font-family: 'Ethnocentric Rg', sans-serif;
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 500;
+            margin-bottom: 15px;
             color: var(--text-primary);
+            letter-spacing: 4px;
         }
 
         .welcome-message p {
             color: var(--text-secondary);
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .message {
             display: flex;
             gap: 16px;
-            animation: fadeIn 0.4s ease;
+            animation: fadeIn 0.3s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+            from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -243,15 +251,15 @@
         .message-content {
             max-width: 80%;
             padding: 14px 20px;
-            font-size: 16px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.6;
             word-wrap: break-word;
             white-space: pre-wrap;
         }
 
         .message.user .message-content {
             background: var(--message-user-bg);
-            border-radius: 18px 18px 4px 18px;
+            border-radius: 12px 12px 2px 12px;
         }
 
         .message.ai .message-content {
@@ -260,15 +268,15 @@
         }
 
         .message-icon {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 4px;
             background-color: var(--primary-color);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 14px;
             flex-shrink: 0;
         }
 
@@ -277,14 +285,14 @@
             padding: 2px 6px;
             border-radius: 4px;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 13px;
             color: #ff6b6b;
         }
 
         .message-content pre {
             background-color: var(--bg-sidebar);
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             overflow-x: auto;
             margin: 10px 0;
             border: 1px solid var(--border-color);
@@ -332,7 +340,7 @@
             color: var(--text-primary);
             resize: none;
             max-height: 200px;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
             padding: 8px 0;
         }
@@ -390,7 +398,7 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             padding: 30px;
         }
 
@@ -402,7 +410,7 @@
         }
 
         .modal-header h2 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
         }
 
@@ -422,7 +430,22 @@
             display: block;
             margin-bottom: 8px;
             color: var(--text-secondary);
-            font-size: 14px;
+            font-size: 13px;
+        }
+
+        .setting-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .setting-input:focus {
+            border-color: var(--primary-color);
         }
 
         .slider {
@@ -469,7 +492,7 @@
 
         /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
         }
         ::-webkit-scrollbar-track {
             background: transparent;
@@ -478,15 +501,12 @@
             background: var(--border-color);
             border-radius: 3px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
-        }
 
         @media (max-width: 768px) {
             .container { flex-direction: column; }
             .sidebar { width: 100%; height: auto; flex-direction: row; align-items: center; padding: 10px 20px;}
             .sidebar-header { padding: 0; flex: 1; display: flex; align-items: center; gap: 15px;}
-            .app-title { margin-bottom: 0; font-size: 20px;}
+            .app-title { margin-bottom: 0; font-size: 14px;}
             .new-chat-btn { width: auto; padding: 6px 12px;}
             .chat-history, .sidebar-footer { display: none; }
             .input-area { padding: 15px; }
@@ -529,7 +549,6 @@
                     <div class="model-selector">
                         <select id="modelSelect" onchange="changeModel()">
                             <option value="openai/gpt-4o">GPT-4 Omni</option>
-                            <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
                             <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
                             <option value="deepseek/deepseek-chat">DeepSeek Chat</option>
                         </select>
@@ -566,6 +585,11 @@
             </div>
             <div class="modal-body">
                 <div class="setting-group">
+                    <label>OpenRouter API Key</label>
+                    <input type="password" id="apiKeyInput" class="setting-input" placeholder="sk-or-v1-..." onchange="updateApiKey()">
+                    <small style="color: var(--text-secondary); font-size: 11px; margin-top: 4px; display: block;">Get your key free at openrouter.ai</small>
+                </div>
+                <div class="setting-group">
                     <label>Temperature (<span id="temperatureValue">0.7</span>)</label>
                     <input type="range" id="temperatureSlider" class="slider" min="0" max="1" step="0.1" value="0.7" onchange="updateTemperature()">
                 </div>
@@ -585,11 +609,11 @@
             currentModel: 'openai/gpt-4o',
             temperature: parseFloat(localStorage.getItem('lksai_temperature') || '0.7'),
             contextWindow: parseInt(localStorage.getItem('lksai_context_window') || '5'),
+            apiKey: localStorage.getItem('lksai_api_key') || '',
             messages: [],
             chatHistory: JSON.parse(localStorage.getItem('lksai_chat_history') || '[]'),
             currentChatId: null,
-            isLoading: false,
-            apiKey: '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'
+            isLoading: false
         };
 
         const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -632,6 +656,15 @@
             document.getElementById('temperatureValue').textContent = state.temperature;
             document.getElementById('contextWindowSlider').value = state.contextWindow;
             document.getElementById('contextValue').textContent = state.contextWindow;
+            if (state.apiKey) {
+                document.getElementById('apiKeyInput').value = state.apiKey;
+            }
+        }
+
+        function updateApiKey() {
+            state.apiKey = document.getElementById('apiKeyInput').value.trim();
+            localStorage.setItem('lksai_api_key', state.apiKey);
+            showToast('API Key updated successfully');
         }
 
         async function sendMessage() {
@@ -639,6 +672,12 @@
             const message = messageInput.value.trim();
 
             if (!message || state.isLoading) return;
+
+            if (!state.apiKey) {
+                showToast('Please add your OpenRouter API Key in Settings');
+                toggleSettings();
+                return;
+            }
 
             state.messages.push({ role: 'user', content: message });
             renderMessages();
@@ -675,7 +714,10 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('API Error');
+                if (!response.ok) {
+                    const errJson = await response.json().catch(() => ({}));
+                    throw new Error(errJson.error?.message || `API Error: ${response.status}`);
+                }
 
                 await handleStreamedResponse(response);
                 updateChatHistory();
@@ -716,12 +758,12 @@
                             }
 
                             state.messages[state.messages.length - 1].content = assistantMessage;
-                            renderMessages(true); // pass true to indicate it's streaming (adds cursor)
+                            renderMessages(true);
                         } catch (e) {}
                     }
                 }
             }
-            renderMessages(false); // remove cursor
+            renderMessages(false);
         }
 
         function renderMessages(isStreaming = false) {
@@ -757,7 +799,6 @@
                 messagesArea.appendChild(messageEl);
             });
 
-            // Smooth scroll to bottom
             const container = document.querySelector('.messages-container');
             container.scrollTop = container.scrollHeight;
         }
@@ -849,7 +890,6 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Close modal when clicking outside
         document.addEventListener('click', (e) => {
             const modal = document.getElementById('settingsModal');
             if (e.target === modal) modal.classList.remove('active');
