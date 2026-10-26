@@ -192,7 +192,6 @@
             font-size: 13px;
             cursor: pointer;
             outline: none;
-            max-width: 320px;
         }
 
         /* Messages */
@@ -441,21 +440,6 @@
             font-size: 13px;
         }
 
-        .text-input {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 13px;
-            outline: none;
-        }
-
-        .text-input:focus {
-            border-color: var(--text-secondary);
-        }
-
         .slider {
             width: 100%;
             accent-color: var(--primary-color);
@@ -477,24 +461,6 @@
 
         .btn-primary:hover {
             background: var(--primary-dark);
-        }
-
-        .btn-secondary {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-card-hover);
         }
 
         /* Toast */
@@ -577,17 +543,10 @@
                 <div class="header-right">
                     <div class="model-selector">
                         <select id="modelSelect" onchange="changeModel()">
-                            <optgroup label="Free Models (No Credits Needed)" id="freeModelsGroup">
-                                <option value="openrouter/free">⚡ Auto Free Router (Always Active)</option>
-                                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
-                                <option value="deepseek/deepseek-chat:free">DeepSeek V3 (Free)</option>
-                                <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
-                            </optgroup>
-                            <optgroup label="Paid Models (Requires OpenRouter Credits)">
-                                <option value="openai/gpt-4o">GPT-4 Omni (Paid)</option>
-                                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Paid)</option>
-                                <option value="deepseek/deepseek-chat">DeepSeek Chat (Paid)</option>
-                            </optgroup>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                         </select>
                     </div>
                 </div>
@@ -613,7 +572,7 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- Settings Modal (API Key Input Removed) -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -622,10 +581,6 @@
             </div>
             <div class="modal-body">
                 <div class="setting-group">
-                    <label>OpenRouter API Key</label>
-                    <input type="password" id="apiKeyInput" class="text-input" placeholder="sk-or-v1-..." onchange="updateApiKey()">
-                </div>
-                <div class="setting-group">
                     <label>Temperature (<span id="temperatureValue">0.7</span>)</label>
                     <input type="range" id="temperatureSlider" class="slider" min="0" max="1" step="0.1" value="0.7" onchange="updateTemperature()">
                 </div>
@@ -633,7 +588,6 @@
                     <label>Context Memory (<span id="contextValue">5</span> messages)</label>
                     <input type="range" id="contextWindowSlider" class="slider" min="1" max="10" step="1" value="5" onchange="updateContextWindow()">
                 </div>
-                <button class="btn-secondary" onclick="testApiKey()">Check API Key Status</button>
                 <button class="btn-primary" onclick="clearChatHistory()">Clear Chat History</button>
             </div>
         </div>
@@ -642,27 +596,26 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        const DEFAULT_KEY = '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';
-
         const state = {
-            currentModel: 'openrouter/free',
+            currentModel: 'gemini-2.5-flash',
             temperature: parseFloat(localStorage.getItem('lksai_temperature') || '0.7'),
             contextWindow: parseInt(localStorage.getItem('lksai_context_window') || '5'),
             messages: [],
             chatHistory: JSON.parse(localStorage.getItem('lksai_chat_history') || '[]'),
             currentChatId: null,
             isLoading: false,
-            apiKey: (localStorage.getItem('lksai_api_key') || DEFAULT_KEY).trim()
+            // Hardcoded Gemini API Key
+            apiKey: 'AQ.Ab8RN6LW8F1Vh0UcWtzy4SiDu6Df7mmIpvXQ09n9V4MzVPXmOQ'
         };
 
-        const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+        // Google Gemini OpenAI-Compatible Endpoint (supports streaming & standard chat completions)
+        const GEMINI_OPENAI_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
             loadSettingsFromStorage();
             renderChatHistory();
             setupTextareaAutoResize();
-            await fetchLiveFreeModels();
         });
 
         function setupEventListeners() {
@@ -675,73 +628,10 @@
             });
         }
 
-        // Automatically fetches live, active free models directly from OpenRouter
-        async function fetchLiveFreeModels() {
-            try {
-                const res = await fetch('https://openrouter.ai/api/v1/models');
-                if (!res.ok) return;
-                const data = await res.json();
-                const freeModels = (data.data || []).filter(m => m.id.endsWith(':free'));
-
-                if (freeModels.length > 0) {
-                    const freeGroup = document.getElementById('freeModelsGroup');
-                    freeGroup.innerHTML = `<option value="openrouter/free">⚡ Auto Free Router (Always Active)</option>`;
-
-                    freeModels.forEach(model => {
-                        const opt = document.createElement('option');
-                        opt.value = model.id;
-                        opt.textContent = model.name.includes('(free)') ? model.name : `${model.name} (Free)`;
-                        freeGroup.appendChild(opt);
-                    });
-
-                    // Restore user's saved selection if it is still active, otherwise use Auto Free Router
-                    const select = document.getElementById('modelSelect');
-                    const savedModel = localStorage.getItem('lksai_model');
-                    if (savedModel && Array.from(select.options).some(opt => opt.value === savedModel)) {
-                        state.currentModel = savedModel;
-                    } else {
-                        state.currentModel = 'openrouter/free';
-                        localStorage.setItem('lksai_model', state.currentModel);
-                    }
-                    select.value = state.currentModel;
-                }
-            } catch (err) {
-                console.warn('Could not fetch live model list, using fallback options.');
-            }
-        }
-
         function changeModel() {
             const select = document.getElementById('modelSelect');
             state.currentModel = select.value;
-            localStorage.setItem('lksai_model', state.currentModel);
-        }
-
-        function updateApiKey() {
-            const input = document.getElementById('apiKeyInput');
-            state.apiKey = input.value.trim();
-            localStorage.setItem('lksai_api_key', state.apiKey);
-            showToast('API Key saved!');
-        }
-
-        async function testApiKey() {
-            if (!state.apiKey) {
-                showToast('Please enter an API Key first.');
-                return;
-            }
-            try {
-                const res = await fetch('https://openrouter.ai/api/v1/auth/key', {
-                    headers: { 'Authorization': `Bearer ${state.apiKey.trim()}` }
-                });
-                const data = await res.json();
-                if (!res.ok) {
-                    throw new Error(data.error?.message || `HTTP ${res.status}`);
-                }
-                const usage = data.data?.usage ?? 0;
-                const limit = data.data?.limit !== null && data.data?.limit !== undefined ? `$${data.data.limit}` : 'Unlimited';
-                showToast(`Key Valid! Usage: $${usage.toFixed(4)} / Limit: ${limit}`, 5000);
-            } catch (err) {
-                showToast(`Key Error: ${err.message}`, 5000);
-            }
+            localStorage.setItem('lksai_gemini_model', state.currentModel);
         }
 
         function setupTextareaAutoResize() {
@@ -754,18 +644,16 @@
 
         function loadSettingsFromStorage() {
             const select = document.getElementById('modelSelect');
-            const savedModel = localStorage.getItem('lksai_model');
+            const savedModel = localStorage.getItem('lksai_gemini_model');
 
-            // Remove deprecated model from storage if present
-            if (savedModel && savedModel !== 'google/gemini-2.0-flash-exp:free' && Array.from(select.options).some(opt => opt.value === savedModel)) {
+            if (savedModel && Array.from(select.options).some(opt => opt.value === savedModel)) {
                 state.currentModel = savedModel;
             } else {
-                state.currentModel = 'openrouter/free';
-                localStorage.setItem('lksai_model', state.currentModel);
+                state.currentModel = 'gemini-2.5-flash';
+                localStorage.setItem('lksai_gemini_model', state.currentModel);
             }
             select.value = state.currentModel;
 
-            document.getElementById('apiKeyInput').value = state.apiKey;
             document.getElementById('temperatureSlider').value = state.temperature;
             document.getElementById('temperatureValue').textContent = state.temperature;
             document.getElementById('contextWindowSlider').value = state.contextWindow;
@@ -797,35 +685,54 @@
             document.querySelector('.send-btn').disabled = true;
 
             try {
-                const referer = window.location.href.startsWith('http') ? window.location.href : 'https://localhost';
+                const recentMessages = state.messages.slice(-state.contextWindow * 2);
 
-                const response = await fetch(OPENROUTER_API_URL, {
+                // First attempt: Google Gemini's OpenAI-compatible SSE streaming endpoint
+                let response = await fetch(GEMINI_OPENAI_URL, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${state.apiKey.trim()}`,
-                        'HTTP-Referer': referer,
-                        'X-Title': 'LksAI',
+                        'Authorization': `Bearer ${state.apiKey}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         model: state.currentModel,
-                        messages: state.messages.slice(-state.contextWindow * 2),
+                        messages: recentMessages,
                         temperature: state.temperature,
                         stream: true
                     })
                 });
 
+                // Fallback: Native Gemini REST streamGenerateContent endpoint
                 if (!response.ok) {
-                    const errJson = await response.json().catch(() => ({}));
-                    const errMsg = errJson.error?.message || `API Error: ${response.status} - ${response.statusText}`;
-                    console.error('OpenRouter Error Details:', errJson);
-                    throw new Error(errMsg);
+                    const geminiContents = recentMessages.map(m => ({
+                        role: m.role === 'assistant' ? 'model' : 'user',
+                        parts: [{ text: m.content }]
+                    }));
+
+                    const nativeUrl = `https://generativelanguage.googleapis.com/v1beta/models/${state.currentModel}:streamGenerateContent?alt=sse&key=${encodeURIComponent(state.apiKey)}`;
+                    const nativeRes = await fetch(nativeUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: geminiContents,
+                            generationConfig: { temperature: state.temperature }
+                        })
+                    });
+
+                    if (!nativeRes.ok) {
+                        const errJson = await nativeRes.json().catch(() => ({}));
+                        const errMsg = errJson.error?.message || `API Error: ${nativeRes.status} - ${nativeRes.statusText}`;
+                        throw new Error(errMsg);
+                    }
+
+                    await handleNativeGeminiStream(nativeRes);
+                } else {
+                    await handleOpenAICompatibleStream(response);
                 }
 
-                await handleStreamedResponse(response);
                 updateChatHistory();
             } catch (error) {
-                console.error('Request failed:', error);
+                console.error('Gemini API Error:', error);
                 showToast(`Error: ${error.message}`, 6000);
                 state.messages.pop();
                 renderMessages();
@@ -836,7 +743,7 @@
             }
         }
 
-        async function handleStreamedResponse(response) {
+        async function handleOpenAICompatibleStream(response) {
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let assistantMessage = '';
@@ -850,12 +757,9 @@
                 const lines = chunk.split('\n');
 
                 for (const line of lines) {
-                    if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                    if (line.startsWith('data: ') && line.trim() !== 'data: [DONE]') {
                         try {
                             const json = JSON.parse(line.slice(6));
-                            if (json.error) {
-                                throw new Error(json.error.message || 'Stream error occurred');
-                            }
                             const content = json.choices?.[0]?.delta?.content || '';
                             assistantMessage += content;
 
@@ -866,11 +770,42 @@
 
                             state.messages[state.messages.length - 1].content = assistantMessage;
                             renderMessages(true);
-                        } catch (e) {
-                            if (e.message && !e.message.includes('Unexpected token') && !e.message.includes('JSON')) {
-                                throw e;
+                        } catch (e) {}
+                    }
+                }
+            }
+            renderMessages(false);
+        }
+
+        async function handleNativeGeminiStream(response) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let assistantMessage = '';
+            let messageAdded = false;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const json = JSON.parse(line.slice(6));
+                            const parts = json.candidates?.[0]?.content?.parts || [];
+                            const content = parts.map(p => p.text || '').join('');
+                            assistantMessage += content;
+
+                            if (!messageAdded) {
+                                state.messages.push({ role: 'assistant', content: '' });
+                                messageAdded = true;
                             }
-                        }
+
+                            state.messages[state.messages.length - 1].content = assistantMessage;
+                            renderMessages(true);
+                        } catch (e) {}
                     }
                 }
             }
@@ -972,39 +907,4 @@
 
         function updateTemperature() {
             state.temperature = parseFloat(document.getElementById('temperatureSlider').value);
-            document.getElementById('temperatureValue').textContent = state.temperature;
-            localStorage.setItem('lksai_temperature', state.temperature);
-        }
-
-        function updateContextWindow() {
-            state.contextWindow = parseInt(document.getElementById('contextWindowSlider').value);
-            document.getElementById('contextValue').textContent = state.contextWindow;
-            localStorage.setItem('lksai_context_window', state.contextWindow);
-        }
-
-        function clearChatHistory() {
-            if (confirm('Clear all history?')) {
-                state.chatHistory = [];
-                state.messages = [];
-                state.currentChatId = null;
-                localStorage.removeItem('lksai_chat_history');
-                renderChatHistory();
-                renderMessages();
-                toggleSettings();
-            }
-        }
-
-        function showToast(message, duration = 4000) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), duration);
-        }
-
-        document.addEventListener('click', (e) => {
-            const modal = document.getElementById('settingsModal');
-            if (e.target === modal) modal.classList.remove('active');
-        });
-    </script>
-</body>
-</html>
+            document.getElementById('temperatureValue').
