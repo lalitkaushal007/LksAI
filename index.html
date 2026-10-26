@@ -262,7 +262,8 @@
             border-radius: 12px 12px 2px 12px;
         }
 
-        .message.ai .message-content {
+        .message.ai .message-content,
+        .message.assistant .message-content {
             background: var(--message-ai-bg);
             color: var(--text-primary);
         }
@@ -296,6 +297,12 @@
             overflow-x: auto;
             margin: 10px 0;
             border: 1px solid var(--border-color);
+        }
+
+        .message-content pre code {
+            background-color: transparent;
+            padding: 0;
+            color: var(--text-primary);
         }
 
         /* Streaming Cursor */
@@ -433,6 +440,21 @@
             font-size: 13px;
         }
 
+        .text-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .text-input:focus {
+            border-color: var(--text-secondary);
+        }
+
         .slider {
             width: 100%;
             accent-color: var(--primary-color);
@@ -449,10 +471,29 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 10px;
+            transition: background 0.2s ease;
         }
 
         .btn-primary:hover {
             background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
         }
 
         /* Toast */
@@ -469,6 +510,8 @@
             transition: bottom 0.3s ease;
             font-size: 14px;
             font-weight: 500;
+            max-width: 90%;
+            text-align: center;
         }
 
         .toast.show {
@@ -533,9 +576,12 @@
                 <div class="header-right">
                     <div class="model-selector">
                         <select id="modelSelect" onchange="changeModel()">
-                            <option value="openai/gpt-4o">GPT-4 Omni</option>
-                            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                            <option value="deepseek/deepseek-chat">DeepSeek Chat</option>
+                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
+                            <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
+                            <option value="deepseek/deepseek-chat:free">DeepSeek V3 (Free)</option>
+                            <option value="openai/gpt-4o">GPT-4 Omni (Paid)</option>
+                            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Paid)</option>
+                            <option value="deepseek/deepseek-chat">DeepSeek Chat (Paid)</option>
                         </select>
                     </div>
                 </div>
@@ -570,6 +616,10 @@
             </div>
             <div class="modal-body">
                 <div class="setting-group">
+                    <label>OpenRouter API Key</label>
+                    <input type="password" id="apiKeyInput" class="text-input" placeholder="sk-or-v1-..." onchange="updateApiKey()">
+                </div>
+                <div class="setting-group">
                     <label>Temperature (<span id="temperatureValue">0.7</span>)</label>
                     <input type="range" id="temperatureSlider" class="slider" min="0" max="1" step="0.1" value="0.7" onchange="updateTemperature()">
                 </div>
@@ -577,6 +627,7 @@
                     <label>Context Memory (<span id="contextValue">5</span> messages)</label>
                     <input type="range" id="contextWindowSlider" class="slider" min="1" max="10" step="1" value="5" onchange="updateContextWindow()">
                 </div>
+                <button class="btn-secondary" onclick="testApiKey()">Check API Key Status</button>
                 <button class="btn-primary" onclick="clearChatHistory()">Clear Chat History</button>
             </div>
         </div>
@@ -585,16 +636,17 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        const DEFAULT_KEY = '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';
+
         const state = {
-            currentModel: 'openai/gpt-4o',
+            currentModel: 'google/gemini-2.0-flash-exp:free',
             temperature: parseFloat(localStorage.getItem('lksai_temperature') || '0.7'),
             contextWindow: parseInt(localStorage.getItem('lksai_context_window') || '5'),
             messages: [],
             chatHistory: JSON.parse(localStorage.getItem('lksai_chat_history') || '[]'),
             currentChatId: null,
             isLoading: false,
-            // Updated API Key from User Request
-            apiKey: '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'
+            apiKey: (localStorage.getItem('lksai_api_key') || DEFAULT_KEY).trim()
         };
 
         const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -614,11 +666,40 @@
                     sendMessage();
                 }
             });
+        }
 
-            document.getElementById('modelSelect').addEventListener('change', (e) => {
-                state.currentModel = e.target.value;
-                localStorage.setItem('lksai_model', state.currentModel);
-            });
+        function changeModel() {
+            const select = document.getElementById('modelSelect');
+            state.currentModel = select.value;
+            localStorage.setItem('lksai_model', state.currentModel);
+        }
+
+        function updateApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            state.apiKey = input.value.trim();
+            localStorage.setItem('lksai_api_key', state.apiKey);
+            showToast('API Key saved!');
+        }
+
+        async function testApiKey() {
+            if (!state.apiKey) {
+                showToast('Please enter an API Key first.');
+                return;
+            }
+            try {
+                const res = await fetch('https://openrouter.ai/api/v1/auth/key', {
+                    headers: { 'Authorization': `Bearer ${state.apiKey.trim()}` }
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.error?.message || `HTTP ${res.status}`);
+                }
+                const usage = data.data?.usage ?? 0;
+                const limit = data.data?.limit !== null && data.data?.limit !== undefined ? `$${data.data.limit}` : 'Unlimited';
+                showToast(`Key Valid! Usage: $${usage.toFixed(4)} / Limit: ${limit}`, 5000);
+            } catch (err) {
+                showToast(`Key Error: ${err.message}`, 5000);
+            }
         }
 
         function setupTextareaAutoResize() {
@@ -630,9 +711,18 @@
         }
 
         function loadSettingsFromStorage() {
-            const savedModel = localStorage.getItem('lksai_model') || 'openai/gpt-4o';
-            state.currentModel = savedModel;
-            document.getElementById('modelSelect').value = savedModel;
+            const select = document.getElementById('modelSelect');
+            const savedModel = localStorage.getItem('lksai_model');
+
+            if (savedModel && Array.from(select.options).some(opt => opt.value === savedModel)) {
+                state.currentModel = savedModel;
+            } else {
+                state.currentModel = select.options[0].value;
+                localStorage.setItem('lksai_model', state.currentModel);
+            }
+            select.value = state.currentModel;
+
+            document.getElementById('apiKeyInput').value = state.apiKey;
             document.getElementById('temperatureSlider').value = state.temperature;
             document.getElementById('temperatureValue').textContent = state.temperature;
             document.getElementById('contextWindowSlider').value = state.contextWindow;
@@ -664,13 +754,12 @@
             document.querySelector('.send-btn').disabled = true;
 
             try {
-                // Ensure HTTP-Referer is present even if running from local file
-                const referer = (window.location.href.startsWith('http')) ? window.location.href : 'https://lksai-app.local';
+                const referer = window.location.href.startsWith('http') ? window.location.href : 'https://localhost';
 
                 const response = await fetch(OPENROUTER_API_URL, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${state.apiKey}`,
+                        'Authorization': `Bearer ${state.apiKey.trim()}`,
                         'HTTP-Referer': referer,
                         'X-Title': 'LksAI',
                         'Content-Type': 'application/json'
@@ -679,20 +768,23 @@
                         model: state.currentModel,
                         messages: state.messages.slice(-state.contextWindow * 2),
                         temperature: state.temperature,
-                        stream: true // Keeping stream:true for the word-by-word UI animation
+                        stream: true
                     })
                 });
 
                 if (!response.ok) {
                     const errJson = await response.json().catch(() => ({}));
-                    throw new Error(errJson.error?.message || `API Error: ${response.status} - ${response.statusText}`);
+                    const errMsg = errJson.error?.message || `API Error: ${response.status} - ${response.statusText}`;
+                    console.error('OpenRouter Error Details:', errJson);
+                    throw new Error(errMsg);
                 }
 
                 await handleStreamedResponse(response);
                 updateChatHistory();
             } catch (error) {
-                showToast(`Error: ${error.message}`);
-                state.messages.pop(); // Remove the user message if it failed
+                console.error('Request failed:', error);
+                showToast(`Error: ${error.message}`, 6000);
+                state.messages.pop();
                 renderMessages();
             } finally {
                 state.isLoading = false;
@@ -718,6 +810,9 @@
                     if (line.startsWith('data: ') && line !== 'data: [DONE]') {
                         try {
                             const json = JSON.parse(line.slice(6));
+                            if (json.error) {
+                                throw new Error(json.error.message || 'Stream error occurred');
+                            }
                             const content = json.choices?.[0]?.delta?.content || '';
                             assistantMessage += content;
 
@@ -727,12 +822,16 @@
                             }
 
                             state.messages[state.messages.length - 1].content = assistantMessage;
-                            renderMessages(true); // Pass true to show blinking cursor
-                        } catch (e) {}
+                            renderMessages(true);
+                        } catch (e) {
+                            if (e.message && !e.message.includes('Unexpected token') && !e.message.includes('JSON')) {
+                                throw e;
+                            }
+                        }
                     }
                 }
             }
-            renderMessages(false); // Stop blinking cursor
+            renderMessages(false);
         }
 
         function renderMessages(isStreaming = false) {
@@ -752,7 +851,7 @@
             state.messages.forEach((msg, index) => {
                 const isLastAiMessage = isStreaming && index === state.messages.length - 1 && msg.role === 'assistant';
                 const messageEl = document.createElement('div');
-                messageEl.className = `message ${msg.role}`;
+                messageEl.className = `message ${msg.role === 'assistant' ? 'ai' : 'user'}`;
 
                 if (msg.role === 'assistant') {
                     messageEl.innerHTML = `
@@ -768,17 +867,16 @@
                 messagesArea.appendChild(messageEl);
             });
 
-            // Smooth scroll to bottom
             const container = document.querySelector('.messages-container');
             container.scrollTop = container.scrollHeight;
         }
 
         function formatMessage(content) {
             let formatted = escapeHtml(content);
-            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
             formatted = formatted.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
                 return `<pre><code>${code.trim()}</code></pre>`;
             });
+            formatted = formatted.replace(/`([^`]+)`/g, '<code>$1</code>');
             return formatted;
         }
 
@@ -853,11 +951,11 @@
             }
         }
 
-        function showToast(message) {
+        function showToast(message, duration = 4000) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            setTimeout(() => toast.classList.remove('show'), duration);
         }
 
         document.addEventListener('click', (e) => {
