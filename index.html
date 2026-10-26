@@ -572,7 +572,7 @@
         </div>
     </div>
 
-    <!-- Settings Modal (API Key Input Removed) -->
+    <!-- Settings Modal -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -604,11 +604,9 @@
             chatHistory: JSON.parse(localStorage.getItem('lksai_chat_history') || '[]'),
             currentChatId: null,
             isLoading: false,
-            // Hardcoded Gemini API Key
             apiKey: 'AQ.Ab8RN6LW8F1Vh0UcWtzy4SiDu6Df7mmIpvXQ09n9V4MzVPXmOQ'
         };
 
-        // Google Gemini OpenAI-Compatible Endpoint (supports streaming & standard chat completions)
         const GEMINI_OPENAI_URL = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -687,11 +685,11 @@
             try {
                 const recentMessages = state.messages.slice(-state.contextWindow * 2);
 
-                // First attempt: Google Gemini's OpenAI-compatible SSE streaming endpoint
+                // Try OpenAI-compatible endpoint first
                 let response = await fetch(GEMINI_OPENAI_URL, {
                     method: 'POST',
                     headers: {
-                        'Authorization': `Bearer ${state.apiKey}`,
+                        'Authorization': `Bearer ${state.apiKey.trim()}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
@@ -702,14 +700,17 @@
                     })
                 });
 
-                // Fallback: Native Gemini REST streamGenerateContent endpoint
                 if (!response.ok) {
+                    const errJson = await response.json().catch(() => ({}));
+                    console.error('OpenAI-compatible Endpoint Error:', errJson);
+
+                    // Fallback to native Gemini endpoint
                     const geminiContents = recentMessages.map(m => ({
                         role: m.role === 'assistant' ? 'model' : 'user',
                         parts: [{ text: m.content }]
                     }));
 
-                    const nativeUrl = `https://generativelanguage.googleapis.com/v1beta/models/${state.currentModel}:streamGenerateContent?alt=sse&key=${encodeURIComponent(state.apiKey)}`;
+                    const nativeUrl = `https://generativelanguage.googleapis.com/v1beta/models/${state.currentModel}:streamGenerateContent?alt=sse&key=${encodeURIComponent(state.apiKey.trim())}`;
                     const nativeRes = await fetch(nativeUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -720,8 +721,9 @@
                     });
 
                     if (!nativeRes.ok) {
-                        const errJson = await nativeRes.json().catch(() => ({}));
-                        const errMsg = errJson.error?.message || `API Error: ${nativeRes.status} - ${nativeRes.statusText}`;
+                        const nativeErrJson = await nativeRes.json().catch(() => ({}));
+                        console.error('Native Gemini Endpoint Error:', nativeErrJson);
+                        const errMsg = nativeErrJson.error?.message || errJson.error?.message || `API Error: ${nativeRes.status} - ${nativeRes.statusText}`;
                         throw new Error(errMsg);
                     }
 
@@ -732,7 +734,7 @@
 
                 updateChatHistory();
             } catch (error) {
-                console.error('Gemini API Error:', error);
+                console.error('API Call Failed:', error);
                 showToast(`Error: ${error.message}`, 6000);
                 state.messages.pop();
                 renderMessages();
@@ -907,4 +909,39 @@
 
         function updateTemperature() {
             state.temperature = parseFloat(document.getElementById('temperatureSlider').value);
-            document.getElementById('temperatureValue').
+            document.getElementById('temperatureValue').textContent = state.temperature;
+            localStorage.setItem('lksai_temperature', state.temperature);
+        }
+
+        function updateContextWindow() {
+            state.contextWindow = parseInt(document.getElementById('contextWindowSlider').value);
+            document.getElementById('contextValue').textContent = state.contextWindow;
+            localStorage.setItem('lksai_context_window', state.contextWindow);
+        }
+
+        function clearChatHistory() {
+            if (confirm('Clear all history?')) {
+                state.chatHistory = [];
+                state.messages = [];
+                state.currentChatId = null;
+                localStorage.removeItem('lksai_chat_history');
+                renderChatHistory();
+                renderMessages();
+                toggleSettings();
+            }
+        }
+
+        function showToast(message, duration = 4000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('settingsModal');
+            if (e.target === modal) modal.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
