@@ -192,6 +192,7 @@
             font-size: 13px;
             cursor: pointer;
             outline: none;
+            max-width: 320px;
         }
 
         /* Messages */
@@ -576,12 +577,17 @@
                 <div class="header-right">
                     <div class="model-selector">
                         <select id="modelSelect" onchange="changeModel()">
-                            <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
-                            <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
-                            <option value="deepseek/deepseek-chat:free">DeepSeek V3 (Free)</option>
-                            <option value="openai/gpt-4o">GPT-4 Omni (Paid)</option>
-                            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Paid)</option>
-                            <option value="deepseek/deepseek-chat">DeepSeek Chat (Paid)</option>
+                            <optgroup label="Free Models (No Credits Needed)" id="freeModelsGroup">
+                                <option value="openrouter/free">⚡ Auto Free Router (Always Active)</option>
+                                <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
+                                <option value="deepseek/deepseek-chat:free">DeepSeek V3 (Free)</option>
+                                <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
+                            </optgroup>
+                            <optgroup label="Paid Models (Requires OpenRouter Credits)">
+                                <option value="openai/gpt-4o">GPT-4 Omni (Paid)</option>
+                                <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Paid)</option>
+                                <option value="deepseek/deepseek-chat">DeepSeek Chat (Paid)</option>
+                            </optgroup>
                         </select>
                     </div>
                 </div>
@@ -639,7 +645,7 @@
         const DEFAULT_KEY = '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';
 
         const state = {
-            currentModel: 'google/gemini-2.0-flash-exp:free',
+            currentModel: 'openrouter/free',
             temperature: parseFloat(localStorage.getItem('lksai_temperature') || '0.7'),
             contextWindow: parseInt(localStorage.getItem('lksai_context_window') || '5'),
             messages: [],
@@ -651,11 +657,12 @@
 
         const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             setupEventListeners();
             loadSettingsFromStorage();
             renderChatHistory();
             setupTextareaAutoResize();
+            await fetchLiveFreeModels();
         });
 
         function setupEventListeners() {
@@ -666,6 +673,41 @@
                     sendMessage();
                 }
             });
+        }
+
+        // Automatically fetches live, active free models directly from OpenRouter
+        async function fetchLiveFreeModels() {
+            try {
+                const res = await fetch('https://openrouter.ai/api/v1/models');
+                if (!res.ok) return;
+                const data = await res.json();
+                const freeModels = (data.data || []).filter(m => m.id.endsWith(':free'));
+
+                if (freeModels.length > 0) {
+                    const freeGroup = document.getElementById('freeModelsGroup');
+                    freeGroup.innerHTML = `<option value="openrouter/free">⚡ Auto Free Router (Always Active)</option>`;
+
+                    freeModels.forEach(model => {
+                        const opt = document.createElement('option');
+                        opt.value = model.id;
+                        opt.textContent = model.name.includes('(free)') ? model.name : `${model.name} (Free)`;
+                        freeGroup.appendChild(opt);
+                    });
+
+                    // Restore user's saved selection if it is still active, otherwise use Auto Free Router
+                    const select = document.getElementById('modelSelect');
+                    const savedModel = localStorage.getItem('lksai_model');
+                    if (savedModel && Array.from(select.options).some(opt => opt.value === savedModel)) {
+                        state.currentModel = savedModel;
+                    } else {
+                        state.currentModel = 'openrouter/free';
+                        localStorage.setItem('lksai_model', state.currentModel);
+                    }
+                    select.value = state.currentModel;
+                }
+            } catch (err) {
+                console.warn('Could not fetch live model list, using fallback options.');
+            }
         }
 
         function changeModel() {
@@ -714,10 +756,11 @@
             const select = document.getElementById('modelSelect');
             const savedModel = localStorage.getItem('lksai_model');
 
-            if (savedModel && Array.from(select.options).some(opt => opt.value === savedModel)) {
+            // Remove deprecated model from storage if present
+            if (savedModel && savedModel !== 'google/gemini-2.0-flash-exp:free' && Array.from(select.options).some(opt => opt.value === savedModel)) {
                 state.currentModel = savedModel;
             } else {
-                state.currentModel = select.options[0].value;
+                state.currentModel = 'openrouter/free';
                 localStorage.setItem('lksai_model', state.currentModel);
             }
             select.value = state.currentModel;
